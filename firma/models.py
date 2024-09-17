@@ -1,15 +1,17 @@
+import re
+
+
 class Client:
-    """Класс клиента"""
 
     def __init__(
             self,
-            email: str,
-            phone_number: str,
-            firstname: str, 
-            surname: str, 
-            fathersname: str|None,
-            pasport: str,
-            balance: float|None=None
+            email,
+            phone_number,
+            firstname, 
+            surname, 
+            fathersname,
+            pasport,
+            balance=None
         ):
         self.set_email(email)
         self.set_phone_number(phone_number)
@@ -19,26 +21,26 @@ class Client:
         self.set_pasport(pasport)
         self.set_balance(balance)
 
-    def set_email(self, email: str):
-        self._email = email
+    def set_email(self, email):
+        self._email = self.__validate_email(email)
     
-    def set_phone_number(self, phone_number: str):
-        self._phone_number = phone_number
+    def set_phone_number(self, phone_number):
+        self._phone_number = self.__validate_phone_number(phone_number)
 
-    def set_firstname(self, firstname: str):
-        self._firstname = firstname
+    def set_firstname(self, firstname):
+        self._firstname = self.__validate_fio(firstname)
     
-    def set_surname(self, surname: str):
-        self._surname = surname
+    def set_surname(self, surname):
+        self._surname = self.__validate_fio(surname)
 
-    def set_fathersname(self, fathersname: str|None):
-        self._fathersname = fathersname
+    def set_fathersname(self, fathersname):
+        self._fathersname = self.__validate_fio(fathersname, True)
 
-    def set_pasport(self, pasport: str):
-        self._pasport = pasport
+    def set_pasport(self, pasport):
+        self._pasport = self.__validate_pasport(pasport)
     
-    def set_balance(self, balance: float|None):
-        self._balance = balance
+    def set_balance(self, balance):
+        self._balance = self.__validate_balance(balance)
 
     def get_email(self):
         return self._email
@@ -61,5 +63,42 @@ class Client:
     def get_balance(self):
         return self._balance
     
-    def __str__(self)->str:
+    @staticmethod
+    def __validate_email(email):
+        if not isinstance(email, str) or not re.fullmatch(r'([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)', email):
+            raise ValueError('Неверный email.')
+        return email
+    
+    @staticmethod
+    def __validate_phone_number(phone_number):
+        if not isinstance(phone_number, str) or not re.fullmatch(r'((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}', phone_number):
+            raise ValueError('Неверный номер телефона.')
+        return phone_number
+    
+    @staticmethod
+    def __validate_pasport(pasport):
+        if not isinstance(pasport, str) or not re.fullmatch(r'\d{4} \d{6}', pasport):
+            raise ValueError('Неверные паспортные данные.')
+        return pasport
+    
+    @staticmethod
+    def __validate_fio(fio_field, is_fathersname=False):
+        if not isinstance(fio_field, str) and not is_fathersname:
+            raise ValueError('Имя и Фамилия должны быть строковыми.')
+        if not fio_field and not is_fathersname:
+            raise ValueError('ФИО не должно быть пустым')
+        if ((is_fathersname and fio_field is not None) or not is_fathersname) and re.search(r'\d', fio_field) is not None:
+                raise ValueError('ФИО не должно содеражть цифр.')
+        return fio_field
+    
+    @staticmethod
+    def __validate_balance(balance):
+        if balance is not None:
+            if not isinstance(balance, (float, int)):
+                raise ValueError('Баланс должен быть числом.')
+            if balance < 0:
+                raise ValueError('Баланс не может быть отрицательным.')
+        return balance
+    
+    def __str__(self):
         return f'{self._surname} {self._firstname}'
