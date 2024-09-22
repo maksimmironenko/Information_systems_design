@@ -115,5 +115,39 @@ class Client:
             balance=fields['balance'],
         )
     
+    @property
+    def full_information(self):
+        return (
+            self.get_surname(), 
+            self.get_firstname(), 
+            self.get_fathersname(),
+            self.get_email(),
+            self.get_pasport(), 
+            self.get_phone_number(),
+            self.get_balance(),
+        )
+    
+    @property
+    def short_information(self):
+        return (
+            self.get_surname(), 
+            self.get_firstname(), 
+            self.get_fathersname(),
+            self.get_email(),
+        )
+    
+    def __eq__(self, other):
+        if any((
+            self.get_surname() != other.get_surname(),
+            self.get_firstname() != other.get_firstname(),
+            self.get_fathersname() != other.get_fathersname(),
+            self.get_email() != other.get_email(),
+            self.get_pasport() != other.get_pasport(), 
+            self.get_phone_number() != other.get_phone_number(),
+            self.get_balance() != other.get_balance(),
+        )):
+            return False
+        return True
+
     def __str__(self):
         return f'{self._surname} {self._firstname}'
