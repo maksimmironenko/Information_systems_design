@@ -1,5 +1,7 @@
 import re
 
+import json
+
 
 class Client:
 
@@ -99,6 +101,19 @@ class Client:
             if balance < 0:
                 raise ValueError('Баланс не может быть отрицательным.')
         return balance
+    
+    @classmethod
+    def from_json(cls, json_str):
+        fields = json.loads(json_str)
+        return cls(
+            email=fields['email'],
+            phone_number=fields['phone_number'],
+            firstname=fields['firstname'],
+            surname=fields['surname'],
+            fathersname=fields['fathersname'],
+            pasport=fields['pasport'],
+            balance=fields['balance'],
+        )
     
     def __str__(self):
         return f'{self._surname} {self._firstname}'
