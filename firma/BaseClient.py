@@ -56,14 +56,12 @@ class BaseClient:
         return fio_field
 
     def __eq__(self, other):
-        if any((
-            self.get_surname() != other.get_surname(),
-            self.get_firstname() != other.get_firstname(),
-            self.get_fathersname() != other.get_fathersname(),
-            self.get_email() != other.get_email(),
-        )):
+        if self.get_email() != other.get_email():
             return False
         return True
+
+    def __hash__(self):
+        return hash(self.email)
     
     def __str__(self):
         return f'{self.get_surname()} {self.get_firstname()}'

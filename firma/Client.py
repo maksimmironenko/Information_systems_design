@@ -94,13 +94,3 @@ class Client(BaseClient):
             self.get_fathersname(),
             self.get_email(),
         )
-    
-    def __eq__(self, other):
-        if any((
-            not super(Client, self).__eq__(other),
-            self.get_pasport() != other.get_pasport(), 
-            self.get_phone_number() != other.get_phone_number(),
-            self.get_balance() != other.get_balance(),
-        )):
-            return False
-        return True
