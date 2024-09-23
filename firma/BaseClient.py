@@ -78,4 +78,4 @@ class BaseClient:
         return hash(self.email)
     
     def __str__(self):
-        return f'{self.get_surname()} {self.get_firstname()}'
+        return f'{self.get_id()} {self.get_surname()} {self.get_firstname()}'
