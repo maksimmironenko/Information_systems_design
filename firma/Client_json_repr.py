@@ -17,15 +17,14 @@ class Client_json_repr(Client):
         return clients
 
     @classmethod
-    def to_json_file(cls, path_to_file, clients, do_not_truncate_file=False):
+    def to_json_file(cls, path_to_file, clients, extend_file=False):
         mode = 'w'
-        if do_not_truncate_file:
-            mode = 'a'
-
+        if extend_file:
+            mode = 'ra'
+        data = []
         with open(path_to_file, mode=mode) as file:
-            file.write('[')
+            if extend_file:
+                data = json.loads(file.read())
             for client in clients:
-                json_entry = json.dumps(client)
-                file.write(json_entry)
-                file.write(',')
-            file.write(']')
+                data.append(client.__dict__)
+            file.write(json.dumps(data))
