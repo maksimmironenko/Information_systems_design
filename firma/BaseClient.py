@@ -5,15 +5,20 @@ class BaseClient:
     
     def __init__(
         self,
+        id,
         email,
         firstname, 
         surname, 
         fathersname,
     ):
+        self.set_id(id)
         self.set_email(email)
         self.set_firstname(firstname)
         self.set_surname(surname)
         self.set_fathersname(fathersname)
+
+    def set_id(self, id):
+        self._id = self.__validate_id(id)
 
     def set_email(self, email):
         self._email = self.__validate_email(email)
@@ -27,6 +32,9 @@ class BaseClient:
     def set_fathersname(self, fathersname):
         self._fathersname = self.__validate_fio(fathersname, True)
 
+    def get_id(self):
+        return self._id
+
     def get_email(self):
         return self._email
     
@@ -38,6 +46,12 @@ class BaseClient:
     
     def get_fathersname(self):
         return self._fathersname
+
+    @staticmethod
+    def __validate_id(id):
+        if not isinstance(id, int) or not id>0:
+            raise ValueError('Неверный id.')
+        return id
     
     @staticmethod
     def __validate_email(email):
