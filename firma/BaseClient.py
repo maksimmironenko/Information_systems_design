@@ -1,6 +1,8 @@
 import re
+from functools import total_ordering
 
 
+@total_ordering
 class BaseClient:
     
     def __init__(
@@ -73,6 +75,9 @@ class BaseClient:
         if self.get_email() != other.get_email():
             return False
         return True
+
+    def __lt__(self, other):
+        return self.get_surname() < other.get_surname()
 
     def __hash__(self):
         return hash(self.email)

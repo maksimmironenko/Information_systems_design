@@ -1,4 +1,5 @@
 import json
+from itertools import count
 
 from common_utils.serializers import ClientSerializer
 from root.settings import BASE_DIR
@@ -11,41 +12,91 @@ class Client_json_repr(Client):
         super(Client_json_repr, self).__init__(*args, **kwargs)
 
     @classmethod
-    def read(cls):
-        path_to_file = BASE_DIR / 'db_json.json'
+    def read(cls, skip=0, count=None):
         clients = []
-        with open(path_to_file) as file:
-            data = file.read()
-            for entry in json.loads(data):
-                clients.append(Client(**entry))
-        return clients
+        data, _ = Client_json_repr.__get_data_from_file()
+        for entry in data:
+            clients.append(Client(**entry))
+        return clients[skip:][:count]
 
     @classmethod
     def save(cls, clients):
         serializer_class = ClientSerializer
+        data, ids = Client_json_repr.__get_data_from_file()
+        for client in clients:
+            serialized_data = serializer_class(client).__dict__
+            if serialized_data['id'] in ids:
+                data[ids.index(serialized_data['id'])] = serialized_data
+            else:
+                data.append(serialized_data)
+        Client_json_repr.__write_data_to_file(data)
+
+    @classmethod
+    def get(cls, id):
+        data, _ = Client_json_repr.__get_data_from_file()
+        for entry in data:
+            if entry['id'] == id:
+                return Client(**entry)
+        return None
+
+    @classmethod
+    def delete(cls, id):
+        data, ids = Client_json_repr.__get_data_from_file()
+        data.remove(data[ids.index(id)])
+        Client_json_repr.__write_data_to_file(data)
+
+    @classmethod
+    def add(
+            cls,
+            email,
+            phone_number,
+            firstname,
+            surname,
+            fathersname,
+            pasport,
+            balance=None
+    ):
+        data, ids = Client_json_repr.__get_data_from_file()
+        ids.sort()
+
+        id = 0
+        if ids:
+            id = ids[-1]
+        id+=1
+
+        data.append(
+            {
+                'id': id,
+                'email': email,
+                'phone_number': phone_number,
+                'firstname': firstname,
+                'surname': surname,
+                'fathersname': fathersname,
+                'pasport': pasport,
+                'balance': balance,
+            }
+        )
+        Client_json_repr.__write_data_to_file(data)
+
+    @classmethod
+    def get_count(cls):
+        return len(Client_json_repr.read())
+
+    @staticmethod
+    def __get_data_from_file():
         path_to_file = BASE_DIR / 'db_json.json'
-        ids = []
         with open(path_to_file) as file:
             try:
                 data = json.loads(file.read())
                 ids = [entry['id'] for entry in data]
             except json.decoder.JSONDecodeError:
                 data = []
-        with open(path_to_file, mode='w') as file:
-            for client in clients:
-                serialized_data = serializer_class(client).__dict__
-                if serialized_data['id'] in ids:
-                    data[ids.index(serialized_data['id'])] = serialized_data
-                else:
-                    data.append(serialized_data)
-            file.write(json.dumps(data))
+                ids = []
 
-    @classmethod
-    def get(cls, id):
+        return data, ids
+
+    @staticmethod
+    def __write_data_to_file(data):
         path_to_file = BASE_DIR / 'db_json.json'
-        with open(path_to_file, mode='r') as file:
-                data = json.loads(file.read())
-        for entry in data:
-            if entry['id'] == id:
-                return Client(**entry)
-        return None
+        with open(path_to_file, mode='w') as file:
+            file.write(json.dumps(data))
