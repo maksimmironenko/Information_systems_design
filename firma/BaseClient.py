@@ -79,3 +79,6 @@ class BaseClient:
     
     def __str__(self):
         return f'{self.get_id()} {self.get_surname()} {self.get_firstname()}'
+
+    def __repr__(self):
+        return self.__str__()

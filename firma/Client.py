@@ -9,6 +9,7 @@ class Client(BaseClient):
 
     def __init__(
             self,
+            id,
             email,
             phone_number,
             firstname, 
@@ -17,7 +18,7 @@ class Client(BaseClient):
             pasport,
             balance=None
         ):
-        super(Client, self).__init__(email=email, firstname=firstname, surname=surname, fathersname=fathersname)
+        super(Client, self).__init__(id=id, email=email, firstname=firstname, surname=surname, fathersname=fathersname)
         self.set_phone_number(phone_number)
         self.set_pasport(pasport)
         self.set_balance(balance)
