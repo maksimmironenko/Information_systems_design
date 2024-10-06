@@ -20,10 +20,14 @@ class ClientRepFile:
         data, ids, emails = cls._get_data_from_file()
         for client in clients:
             serialized_data = serializer_class(client).__dict__
+            if serialized_data['email'] in emails and serialized_data['id'] not in ids:
+                raise ValueError('Поле email - уникально.')
             if serialized_data['id'] in ids:
                 data[ids.index(serialized_data['id'])] = serialized_data
             else:
                 data.append(serialized_data)
+                emails.append(serialized_data['email'])
+                ids.append(serialized_data['id'])
         cls._write_data_to_file(data)
 
     @classmethod
@@ -55,7 +59,9 @@ class ClientRepFile:
             pasport,
             balance=None
     ):
-        data, ids = cls._get_data_from_file()
+        data, ids, emails = cls._get_data_from_file()
+        if email in emails:
+            raise ValueError('Поле email - уникально.')
         ids.sort()
 
         id = 0
