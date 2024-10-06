@@ -9,7 +9,7 @@ class ClientRepFile:
     @classmethod
     def read(cls, skip=None, count=None):
         clients = []
-        data, _ = cls._get_data_from_file()
+        data, _, _ = cls._get_data_from_file()
         for entry in data:
             clients.append(Client(**entry))
         return clients[skip:][:count]
@@ -17,7 +17,7 @@ class ClientRepFile:
     @classmethod
     def save(cls, clients):
         serializer_class = ClientSerializer
-        data, ids = cls._get_data_from_file()
+        data, ids, emails = cls._get_data_from_file()
         for client in clients:
             serialized_data = serializer_class(client).__dict__
             if serialized_data['id'] in ids:
@@ -28,7 +28,7 @@ class ClientRepFile:
 
     @classmethod
     def get(cls, id):
-        data, _ = cls._get_data_from_file()
+        data, _, _ = cls._get_data_from_file()
         for entry in data:
             if entry['id'] == id:
                 return Client(**entry)
@@ -36,7 +36,7 @@ class ClientRepFile:
 
     @classmethod
     def delete(cls, id):
-        data, ids = cls._get_data_from_file()
+        data, ids, _ = cls._get_data_from_file()
         data.remove(data[ids.index(id)])
         cls._write_data_to_file(data)
 
@@ -83,16 +83,11 @@ class ClientRepFile:
 
     @classmethod
     def _get_data_from_file(cls):
-        try:
-            data = cls._get_data_from_file_specific()
-            if data is None:
-                data = []
-            ids = [entry['id'] for entry in data] if data else []
-        except FileException:
-            data = []
-            ids = []
+        data = cls._get_data_from_file_specific()
+        ids = [entry['id'] for entry in data]
+        emails = [entry['email'] for entry in data]
 
-        return data, ids
+        return data, ids, emails
 
     @classmethod
     def _write_data_to_file(cls, data):

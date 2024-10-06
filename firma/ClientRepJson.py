@@ -10,7 +10,10 @@ class ClientRepJson(ClientRepFile):
     def _get_data_from_file_specific(cls):
         path_to_file = BASE_DIR / 'db_json.json'
         with open(path_to_file) as file:
-            data = json.loads(file.read())
+            try:
+                data = json.loads(file.read())
+            except json.decoder.JSONDecodeError:
+                data = []
         return data
 
     @classmethod

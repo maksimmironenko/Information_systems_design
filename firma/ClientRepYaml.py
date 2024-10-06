@@ -11,7 +11,7 @@ class ClientRepYaml(ClientRepFile):
         path_to_file = BASE_DIR / 'db_yaml.yaml'
         with open(path_to_file) as file:
             data = yaml.safe_load(file)
-        return data
+        return data if data else []
 
     @classmethod
     def _write_data_to_file(cls, data):
