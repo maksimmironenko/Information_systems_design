@@ -1,5 +1,7 @@
 from firma.Client import Client
 from common_utils.serializers import ClientSerializer
+from root.settings import BASE_DIR
+from common_utils.exceptions import FileException
 
 
 class ClientRepFile:
@@ -45,6 +47,7 @@ class ClientRepFile:
     @classmethod
     def add(
             cls,
+            id,
             email,
             phone_number,
             firstname,
@@ -81,8 +84,21 @@ class ClientRepFile:
 
     @classmethod
     def _get_data_from_file(cls):
-        raise NotImplementedError("This method should be implemented in a subclass")
+        try:
+            data = cls._get_data_from_file_specific()
+            if data is None:
+                data = []
+            ids = [entry['id'] for entry in data] if data else []
+        except FileException:
+            data = []
+            ids = []
+
+        return data, ids
 
     @classmethod
     def _write_data_to_file(cls, data):
+        raise NotImplementedError("This method should be implemented in a subclass")
+
+    @classmethod
+    def _get_data_from_file_specific(cls):
         raise NotImplementedError("This method should be implemented in a subclass")

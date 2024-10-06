@@ -7,19 +7,11 @@ from firma.ClientRepFile import ClientRepFile
 class ClientRepYaml(ClientRepFile):
 
     @classmethod
-    def _get_data_from_file(cls):
+    def _get_data_from_file_specific(cls):
         path_to_file = BASE_DIR / 'db_yaml.yaml'
         with open(path_to_file) as file:
-            try:
-                data = yaml.safe_load(file)
-                if data is None:
-                    data = []
-                ids = [entry['id'] for entry in data] if data else []
-            except yaml.YAMLError:
-                data = []
-                ids = []
-
-        return data, ids
+            data = yaml.safe_load(file)
+        return data
 
     @classmethod
     def _write_data_to_file(cls, data):

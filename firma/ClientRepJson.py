@@ -7,16 +7,11 @@ from firma.ClientRepFile import ClientRepFile
 class ClientRepJson(ClientRepFile):
 
     @classmethod
-    def _get_data_from_file(cls):
+    def _get_data_from_file_specific(cls):
         path_to_file = BASE_DIR / 'db_json.json'
         with open(path_to_file) as file:
-            try:
-                data = json.loads(file.read())
-                ids = [entry['id'] for entry in data]
-            except json.decoder.JSONDecodeError:
-                data = []
-                ids = []
-        return data, ids
+            data = json.loads(file.read())
+        return data
 
     @classmethod
     def _write_data_to_file(cls, data):
