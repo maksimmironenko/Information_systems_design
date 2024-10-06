@@ -1,37 +1,38 @@
-from firma.Client import Client
-from root.database import connection
+from common_utils.db_connection import DBConnection
 from common_utils.serializers import ClientSerializer
 
-class Client_rep_DB(Client):
+class ClientRepDB:
 
-    def __init__(self, *args, **kwargs):
-        super(Client_rep_DB, self).__init__(*args, **kwargs)
+    def __init__(self):
+        self._connection = DBConnection().get_connection()
+        with self._connection.cursor() as cur:
+            cur.execute(
+                "CREATE TABLE IF NOT EXISTS client (id serial primary key, email varchar unique, phone_number varchar, firstname varchar, surname varchar, fathersname varchar, pasport varchar, balance double precision);")
+            self._connection.commit()
 
-    @staticmethod
-    def get_all():
-        with connection.cursor() as cur:
-            cur.execute("""
+    def get(self, skip=None, count=None):
+        with self._connection.cursor() as cur:
+            cur.execute(f"""
             SELECT * FROM
-            client;
+            client
+            OFFSET {skip if skip else 'null'}
+            LIMIT {count if count else 'null'};
             """)
             return cur.fetchall()
 
-    @staticmethod
-    def get_count():
-        return len(Client_rep_DB.get_all())
+    def get_count(self):
+        return len(self.get())
 
-    @staticmethod
-    def get(id):
+    def get_by_id(self, id):
         if not isinstance(id, int):
             raise ValueError('id должен быть int.')
-        with connection.cursor() as cur:
+        with self._connection.cursor() as cur:
             cur.execute(f"SELECT * FROM client c WHERE c.id = {id};")
             obj = ClientSerializer.from_pg_sql(cur.fetchone())
         return obj
 
-    @staticmethod
-    def add(client):
-        with connection.cursor() as cur:
+    def add(self, client):
+        with self._connection.cursor() as cur:
             cur.execute(f"""
             INSERT INTO client 
             (firstname, surname, phone_number, pasport, balance, email, fathersname) 
@@ -45,20 +46,18 @@ class Client_rep_DB(Client):
                 {"'" if client.get_fathersname() else ''}{client.get_fathersname() if client.get_fathersname() else 'null'}{"'" if client.get_fathersname() else ''}
             )
             """)
-            connection.commit()
+            self._connection.commit()
 
-    @staticmethod
-    def delete(id):
-        with connection.cursor() as cur:
+    def delete(self, id):
+        with self._connection.cursor() as cur:
             cur.execute(f"""
                 DELETE FROM client c
                 WHERE c.id = {id}; 
             """)
-            connection.commit()
+            self._connection.commit()
 
-    @staticmethod
-    def change(id, client):
-        with connection.cursor() as cur:
+    def change(self, id, client):
+        with self._connection.cursor() as cur:
             cur.execute(
                 f"""
                     UPDATE client c
