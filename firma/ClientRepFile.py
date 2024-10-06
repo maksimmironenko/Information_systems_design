@@ -47,7 +47,6 @@ class ClientRepFile:
     @classmethod
     def add(
             cls,
-            id,
             email,
             phone_number,
             firstname,
