@@ -11,9 +11,19 @@ class ClientRepFile:
 
     def read(self, skip=None, count=None):
         clients = []
-        data, _, _ = self.file_strategy.get_data_from_file()
+        data, _, _ = self.get_data_from_file()
         for entry in data:
-            clients.append(Client(**entry))
+            clients.append(
+                Client(
+                    email=entry['email'],
+                    phone_number=entry['phone_number'],
+                    firstname=entry['firstname'],
+                    surname=entry['surname'],
+                    fathersname=entry['fathersname'],
+                    pasport=entry['pasport'],
+                    balance=entry['balance'],
+                )
+            )
         return clients[skip:][:count]
 
     def save(self, clients):
@@ -25,7 +35,7 @@ class ClientRepFile:
                 raise ValueError('Поле email - уникально.')
             data.append(serialized_data)
             emails.append(serialized_data['email'])
-        self.file_strategy._write_data_to_file(data)
+        self.file_strategy.write_data_to_file(data)
 
     def get(self, id):
         data, _, _ = self.file_strategy.get_data_from_file()
