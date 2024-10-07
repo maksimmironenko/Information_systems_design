@@ -2,6 +2,7 @@ from builtins import NotImplementedError
 
 from firma.ClientRepFile import ClientRepFile
 
+
 class ClientFileStrategy(ClientRepFile):
 
     def get_data_from_file_specific(self):
