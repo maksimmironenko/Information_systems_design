@@ -17,17 +17,13 @@ class ClientRepFile:
     @classmethod
     def save(cls, clients):
         serializer_class = ClientSerializer
-        data, ids, emails = cls._get_data_from_file()
+        data, _, emails = cls._get_data_from_file()
         for client in clients:
             serialized_data = serializer_class(client).__dict__
-            if serialized_data['email'] in emails and serialized_data['id'] not in ids:
+            if serialized_data['email'] in emails:
                 raise ValueError('Поле email - уникально.')
-            if serialized_data['id'] in ids:
-                data[ids.index(serialized_data['id'])] = serialized_data
-            else:
-                data.append(serialized_data)
-                emails.append(serialized_data['email'])
-                ids.append(serialized_data['id'])
+            data.append(serialized_data)
+            emails.append(serialized_data['email'])
         cls._write_data_to_file(data)
 
     @classmethod
@@ -35,7 +31,15 @@ class ClientRepFile:
         data, _, _ = cls._get_data_from_file()
         for entry in data:
             if entry['id'] == id:
-                return Client(**entry)
+                return Client(
+                    email=entry['email'],
+                    phone_number=entry['phone_number'],
+                    firstname=entry['firstname'],
+                    surname=entry['surname'],
+                    fathersname=entry['fathersname'],
+                    pasport=entry['pasport'],
+                    balance=entry['balance'],
+                )
         return None
 
     @classmethod
