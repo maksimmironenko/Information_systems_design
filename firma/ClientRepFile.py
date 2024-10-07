@@ -6,6 +6,9 @@ from common_utils.exceptions import FileException
 
 class ClientRepFile:
 
+    def __init__(self, file_strategy):
+        self.file_strategy = file_strategy
+        
     @classmethod
     def read(cls, skip=None, count=None):
         clients = []
