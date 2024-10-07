@@ -3,7 +3,7 @@ from builtins import NotImplementedError
 from firma.ClientRepFile import ClientRepFile
 
 
-class ClientFileStrategy(ClientRepFile):
+class ClientFileStrategy:
 
     def get_data_from_file_specific(self):
         raise NotImplementedError('This method shod be implemented.')
