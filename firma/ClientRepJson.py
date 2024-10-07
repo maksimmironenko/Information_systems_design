@@ -1,13 +1,12 @@
 import json
 
 from root.settings import BASE_DIR
-from firma.ClientRepFile import ClientRepFile
+from firma.ClientFileStrategy import ClientFileStrategy
 
 
-class ClientRepJson(ClientRepFile):
+class ClientRepJson(ClientFileStrategy):
 
-    @classmethod
-    def _get_data_from_file_specific(cls):
+    def get_data_from_file_specific(self):
         path_to_file = BASE_DIR / 'db_json.json'
         with open(path_to_file) as file:
             try:
@@ -16,8 +15,7 @@ class ClientRepJson(ClientRepFile):
                 data = []
         return data
 
-    @classmethod
-    def _write_data_to_file(cls, data):
+    def write_data_to_file(self, data):
         path_to_file = BASE_DIR / 'db_json.json'
         with open(path_to_file, mode='w') as file:
             file.write(json.dumps(data))
