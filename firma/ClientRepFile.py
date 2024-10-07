@@ -8,30 +8,27 @@ class ClientRepFile:
 
     def __init__(self, file_strategy):
         self.file_strategy = file_strategy
-        
-    @classmethod
-    def read(cls, skip=None, count=None):
+
+    def read(self, skip=None, count=None):
         clients = []
-        data, _, _ = cls._get_data_from_file()
+        data, _, _ = self.file_strategy.get_data_from_file()
         for entry in data:
             clients.append(Client(**entry))
         return clients[skip:][:count]
 
-    @classmethod
-    def save(cls, clients):
+    def save(self, clients):
         serializer_class = ClientSerializer
-        data, _, emails = cls._get_data_from_file()
+        data, _, emails = self.file_strategy.get_data_from_file()
         for client in clients:
             serialized_data = serializer_class(client).__dict__
             if serialized_data['email'] in emails:
                 raise ValueError('Поле email - уникально.')
             data.append(serialized_data)
             emails.append(serialized_data['email'])
-        cls._write_data_to_file(data)
+        self.file_strategy._write_data_to_file(data)
 
-    @classmethod
-    def get(cls, id):
-        data, _, _ = cls._get_data_from_file()
+    def get(self, id):
+        data, _, _ = self.file_strategy.get_data_from_file()
         for entry in data:
             if entry['id'] == id:
                 return Client(
@@ -45,19 +42,17 @@ class ClientRepFile:
                 )
         return None
 
-    @classmethod
-    def delete(cls, id):
-        data, ids, _ = cls._get_data_from_file()
+    def delete(self, id):
+        data, ids, _ = self.file_strategy.get_data_from_file()
         data.remove(data[ids.index(id)])
-        cls._write_data_to_file(data)
+        self.file_strategy.write_data_to_file(data)
 
     @classmethod
     def sort_by_email(cls):
         pass
 
-    @classmethod
     def add(
-            cls,
+            self,
             email,
             phone_number,
             firstname,
@@ -66,7 +61,7 @@ class ClientRepFile:
             pasport,
             balance=None
     ):
-        data, ids, emails = cls._get_data_from_file()
+        data, ids, emails = self.file_strategy.get_data_from_file()
         if email in emails:
             raise ValueError('Поле email - уникально.')
         ids.sort()
@@ -88,24 +83,14 @@ class ClientRepFile:
                 'balance': balance,
             }
         )
-        cls._write_data_to_file(data)
+        self.file_strategy.write_data_to_file(data)
 
-    @classmethod
-    def get_count(cls):
-        return len(cls.read())
+    def get_count(self):
+        return len(self.read())
 
-    @classmethod
-    def _get_data_from_file(cls):
-        data = cls._get_data_from_file_specific()
+    def get_data_from_file(self):
+        data = self.file_strategy.get_data_from_file_specific()
         ids = [entry['id'] for entry in data]
         emails = [entry['email'] for entry in data]
 
         return data, ids, emails
-
-    @classmethod
-    def _write_data_to_file(cls, data):
-        raise NotImplementedError("This method should be implemented in a subclass")
-
-    @classmethod
-    def _get_data_from_file_specific(cls):
-        raise NotImplementedError("This method should be implemented in a subclass")
