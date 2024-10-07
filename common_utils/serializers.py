@@ -3,7 +3,6 @@ from firma.Client import Client
 
 class ClientSerializer:
     def __init__(self, client):
-        self.id = client.get_id()
         self.firstname = client.get_firstname()
         self.surname = client.get_surname()
         self.fathersname = client.get_fathersname()
@@ -15,7 +14,6 @@ class ClientSerializer:
     @staticmethod
     def from_pg_sql(sql_response):
         return Client(
-            id=sql_response[0],
             email=sql_response[1],
             phone_number=sql_response[2],
             firstname=sql_response[3],
