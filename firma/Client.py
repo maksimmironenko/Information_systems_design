@@ -16,10 +16,8 @@ class Client(BaseClient):
             fathersname,
             pasport,
             balance=None,
-            id=None,
         ):
-        super(Client, self).__init__(id=id, email=email, firstname=firstname, surname=surname, fathersname=fathersname)
-        self.set_id(id)
+        super(Client, self).__init__(email=email, firstname=firstname, surname=surname, fathersname=fathersname)
         self.set_phone_number(phone_number)
         self.set_pasport(pasport)
         self.set_balance(balance)
@@ -71,7 +69,6 @@ class Client(BaseClient):
     def from_json(cls, json_str):
         fields = json.loads(json_str)
         return cls(
-            id=fields['id'],
             email=fields['email'],
             phone_number=fields['phone_number'],
             firstname=fields['firstname'],
