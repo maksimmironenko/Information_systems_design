@@ -11,20 +11,11 @@ class BaseClient:
         firstname, 
         surname, 
         fathersname,
-        id=None,
     ):
-        if not id:
-            id = id(self)
-        self.set_id(id)
         self.set_email(email)
         self.set_firstname(firstname)
         self.set_surname(surname)
         self.set_fathersname(fathersname)
-
-    def set_id(self, id):
-        if not self.__validate_id(id):
-            raise ValueError('Неверный id.')
-        self._id = id
 
     def set_email(self, email):
         if not self.__validate_email(email):
@@ -47,7 +38,7 @@ class BaseClient:
         self._fathersname = fathersname
 
     def get_id(self):
-        return self._id
+        return id(self)
 
     def get_email(self):
         return self._email
@@ -60,12 +51,6 @@ class BaseClient:
     
     def get_fathersname(self):
         return self._fathersname
-
-    @staticmethod
-    def __validate_id(id):
-        if not isinstance(id, int) or id <= 0:
-            return False
-        return True
     
     @staticmethod
     def __validate_email(email):
