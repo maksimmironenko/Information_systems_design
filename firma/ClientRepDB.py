@@ -10,7 +10,7 @@ class ClientRepDB:
                 "CREATE TABLE IF NOT EXISTS client (id serial primary key, email varchar unique, phone_number varchar, firstname varchar, surname varchar, fathersname varchar, pasport varchar, balance double precision);")
             self._connection.commit()
 
-    def get(self, skip=None, count=None):
+    def read(self, skip=None, count=None):
         with self._connection.cursor() as cur:
             cur.execute(f"""
             SELECT * FROM
@@ -18,12 +18,12 @@ class ClientRepDB:
             OFFSET {skip if skip else 'null'}
             LIMIT {count if count else 'null'};
             """)
-            return cur.fetchall()
+            return [ClientSerializer.from_pg_sql(entry) for entry in cur.fetchall()]
 
     def get_count(self):
-        return len(self.get())
+        return len(self.read())
 
-    def get_by_id(self, id):
+    def get(self, id):
         if not isinstance(id, int):
             raise ValueError('id должен быть int.')
         with self._connection.cursor() as cur:
