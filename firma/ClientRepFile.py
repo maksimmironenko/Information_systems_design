@@ -59,6 +59,15 @@ class ClientRepFile:
     def sort_by_email(cls):
         pass
 
+    def change(self, id, client):
+        data, ids, emails = self.get_data_from_file()
+        index = ids.index(id)
+        serialized_data = ClientSerializer(client).__dict__
+        if data[index]['email'] != serialized_data['email'] and serialized_data['email'] in emails:
+            raise ValueError('Поле email - уникально.')
+        data[index] = {'id': id, **serialized_data}
+        self.file_strategy.write_data_to_file(data)
+
     def add(
             self,
             client,
