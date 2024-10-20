@@ -6,7 +6,8 @@ from firma.ClientFileStrategy import ClientFileStrategy
 
 class ClientRepJson(ClientFileStrategy):
 
-    def get_data_from_file_specific(self):
+    @staticmethod
+    def get_data_from_file_specific():
         path_to_file = BASE_DIR / 'db_json.json'
         with open(path_to_file) as file:
             try:
@@ -15,7 +16,8 @@ class ClientRepJson(ClientFileStrategy):
                 data = []
         return data
 
-    def write_data_to_file(self, data):
+    @staticmethod
+    def write_data_to_file(data):
         path_to_file = BASE_DIR / 'db_json.json'
         with open(path_to_file, mode='w') as file:
             file.write(json.dumps(data))
