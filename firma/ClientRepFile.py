@@ -38,7 +38,7 @@ class ClientRepFile:
         self.file_strategy.write_data_to_file(data)
 
     def get(self, id):
-        data, _, _ = self.file_strategy.get_data_from_file()
+        data, _, _ = self.get_data_from_file()
         for entry in data:
             if entry['id'] == id:
                 return Client(
@@ -53,7 +53,7 @@ class ClientRepFile:
         return None
 
     def delete(self, id):
-        data, ids, _ = self.file_strategy.get_data_from_file()
+        data, ids, _ = self.get_data_from_file()
         data.remove(data[ids.index(id)])
         self.file_strategy.write_data_to_file(data)
 
@@ -63,16 +63,10 @@ class ClientRepFile:
 
     def add(
             self,
-            email,
-            phone_number,
-            firstname,
-            surname,
-            fathersname,
-            pasport,
-            balance=None
+            client,
     ):
-        data, ids, emails = self.file_strategy.get_data_from_file()
-        if email in emails:
+        data, ids, emails = self.get_data_from_file()
+        if client.get_email() in emails:
             raise ValueError('Поле email - уникально.')
         ids.sort()
 
@@ -84,13 +78,7 @@ class ClientRepFile:
         data.append(
             {
                 'id': id,
-                'email': email,
-                'phone_number': phone_number,
-                'firstname': firstname,
-                'surname': surname,
-                'fathersname': fathersname,
-                'pasport': pasport,
-                'balance': balance,
+                **ClientSerializer(client).__dict__,
             }
         )
         self.file_strategy.write_data_to_file(data)
