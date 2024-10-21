@@ -5,24 +5,11 @@ from common_utils.serializers import ClientSerializer
 class ClientRepFile:
 
     def __init__(self, file_strategy):
+        self._data = []
         self.file_strategy = file_strategy
 
-    def read(self, skip=None, count=None):
-        clients = []
-        data, _, _ = self.get_data_from_file()
-        for entry in data:
-            clients.append(
-                Client(
-                    email=entry['email'],
-                    phone_number=entry['phone_number'],
-                    firstname=entry['firstname'],
-                    surname=entry['surname'],
-                    fathersname=entry['fathersname'],
-                    pasport=entry['pasport'],
-                    balance=entry['balance'],
-                )
-            )
-        return clients[skip:][:count]
+    def get_short_list(self, skip=None, count=None):
+        return self._data[skip:][:count]
 
     def save(self, clients):
         serializer_class = ClientSerializer
@@ -36,8 +23,7 @@ class ClientRepFile:
         self.file_strategy.write_data_to_file(data)
 
     def get(self, id):
-        data, _, _ = self.get_data_from_file()
-        for entry in data:
+        for entry in self._data:
             if entry['id'] == id:
                 return Client(
                     email=entry['email'],
@@ -51,29 +37,53 @@ class ClientRepFile:
         return None
 
     def delete(self, id):
-        data, ids, _ = self.get_data_from_file()
-        data.remove(data[ids.index(id)])
-        self.file_strategy.write_data_to_file(data)
+        ids = self.__ids()
+        self._data.remove(self._data[ids.index(id)])
+        self.file_strategy.write_data_to_file(self._data)
 
-    @classmethod
-    def sort_by_email(cls):
-        pass
+    def sort_by_email(self):
+        self._data.sort(key=lambda entry: entry['email'])
 
-    def change(self, id, client):
-        data, ids, emails = self.get_data_from_file()
+    def change(
+        self,
+        id,
+        email,
+        phone_number,
+        firstname, 
+        surname, 
+        fathersname,
+        pasport,
+        balance=None,
+    ):
+        ids, emails = self.__ids(), self.__emails()
         index = ids.index(id)
-        serialized_data = ClientSerializer(client).__dict__
-        if data[index]['email'] != serialized_data['email'] and serialized_data['email'] in emails:
+        data = {
+            'id': id,
+            'email': email,
+            'phone_number': phone_number,
+            'firstname': firstname, 
+            'surname': surname, 
+            'fathersname': fathersname,
+            'pasport': pasport,
+            'balance': balance,
+        }
+        if email != self._data[ids.index(id)]['email'] and email in emails:
             raise ValueError('Поле email - уникально.')
-        data[index] = {'id': id, **serialized_data}
-        self.file_strategy.write_data_to_file(data)
+        self._data[index] = data
+        self.file_strategy.write_data_to_file(self._data)
 
     def add(
-            self,
-            client,
+        self, 
+        email,
+        phone_number,
+        firstname, 
+        surname, 
+        fathersname,
+        pasport,
+        balance=None,
     ):
-        data, ids, emails = self.get_data_from_file()
-        if client.get_email() in emails:
+        ids, emails = self.__ids(), self.__email()
+        if email in emails:
             raise ValueError('Поле email - уникально.')
         ids.sort()
 
@@ -82,20 +92,29 @@ class ClientRepFile:
             id = ids[-1]
         id += 1
 
-        data.append(
+        self._data.append(
             {
                 'id': id,
-                **ClientSerializer(client).__dict__,
+                'email': email,
+                'phone_number': phone_number,
+                'firstname': firstname, 
+                'surname': surname, 
+                'fathersname': fathersname,
+                'pasport'; pasport,
+                'balance': balance,
             }
         )
-        self.file_strategy.write_data_to_file(data)
+        self.file_strategy.write_data_to_file(self._data)
 
     def get_count(self):
-        return len(self.read())
+        return len(self._data)
 
     def get_data_from_file(self):
         data = self.file_strategy.get_data_from_file_specific()
-        ids = [entry['id'] for entry in data]
-        emails = [entry['email'] for entry in data]
+        self._data = data
 
-        return data, ids, emails
+    def __ids(self):
+        return [entry['id'] for entry in self._data]
+
+    def __emails(self):
+        return [entry['email'] for entry in self._data]
