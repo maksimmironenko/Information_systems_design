@@ -6,7 +6,7 @@ from firma.ClientRepFile import ClientRepFile
 class ClientFileStrategy:
 
     @staticmethod
-    def get_data_from_file_specific():
+    def read_data_from_file():
         raise NotImplementedError('This method shod be implemented.')
 
     @staticmethod

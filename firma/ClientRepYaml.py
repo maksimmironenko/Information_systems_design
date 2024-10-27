@@ -7,7 +7,7 @@ from firma.ClientFileStrategy import ClientFileStrategy
 class ClientRepYaml(ClientFileStrategy):
 
     @staticmethod
-    def get_data_from_file_specific():
+    def read_data_from_file():
         path_to_file = BASE_DIR / 'db_yaml.yaml'
         with open(path_to_file) as file:
             data = yaml.safe_load(file)
