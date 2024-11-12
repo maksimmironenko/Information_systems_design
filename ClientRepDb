@@ -1,0 +1,85 @@
+
+import psycopg2
+from psycopg2 import sql
+
+class Client:
+    def __init__(self, client_id, last_name, first_name, middle_name, address, phone):
+        self.client_id = client_id
+        self.last_name = last_name
+        self.first_name = first_name
+        self.middle_name = middle_name
+        self.address = address
+        self.phone = phone
+
+    @classmethod
+    def from_row(cls, row):
+        return cls(
+            client_id=row[0],
+            last_name=row[1],
+            first_name=row[2],
+            middle_name=row[3],
+            address=row[4],
+            phone=row[5]
+        )
+
+class ClientRepDb:
+    def __init__(self, host, database, user, password):
+        self.conn = psycopg2.connect(
+            host=host,
+            database=database,
+            user=user,
+            password=password
+        )
+        self.conn.autocommit = True
+
+    def get_by_id(self, client_id):
+        """Получить клиента по ID"""
+        with self.conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM clients WHERE client_id = %s", (client_id,))
+            row = cursor.fetchone()
+            return Client.from_row(row) if row else None
+
+    def get_k_n_short_list(self, k, n):
+        """Получить список из n клиентов, начиная с k-го по счету (для пагинации)"""
+        offset = k * n
+        with self.conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM clients ORDER BY client_id LIMIT %s OFFSET %s", (n, offset))
+            rows = cursor.fetchall()
+            return [Client.from_row(row) for row in rows]
+
+    def add_client(self, last_name, first_name, middle_name, address, phone):
+        """Добавить нового клиента, создавая уникальный client_id"""
+        with self.conn.cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO clients (last_name, first_name, middle_name, address, phone) VALUES (%s, %s, %s, %s, %s) RETURNING client_id",
+                (last_name, first_name, middle_name, address, phone)
+            )
+            client_id = cursor.fetchone()[0]
+            return client_id
+
+    def replace_client_by_id(self, client_id, last_name, first_name, middle_name, address, phone):
+        """Заменить клиента по ID новыми данными"""
+        with self.conn.cursor() as cursor:
+            cursor.execute(
+                "UPDATE clients SET last_name = %s, first_name = %s, middle_name = %s, address = %s, phone = %s WHERE client_id = %s",
+                (last_name, first_name, middle_name, address, phone, client_id)
+            )
+            return cursor.rowcount > 0  # Возвращает True, если обновление прошло успешно
+
+    def delete_by_id(self, client_id):
+        """Удалить клиента по ID"""
+        with self.conn.cursor() as cursor:
+            cursor.execute("DELETE FROM clients WHERE client_id = %s", (client_id,))
+            return cursor.rowcount > 0  # Возвращает True, если удаление прошло успешно
+
+    def get_count(self):
+        """Получить количество клиентов"""
+        with self.conn.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) FROM clients")
+            count = cursor.fetchone()[0]
+            return count
+
+    def __del__(self):
+        """Закрыть соединение с базой данных"""
+        if self.conn:
+            self.conn.close()
