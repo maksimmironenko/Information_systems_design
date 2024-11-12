@@ -1,0 +1,105 @@
+import psycopg2
+from psycopg2 import sql
+
+class DatabaseConnection:
+    """Класс для подключения к базе данных PostgreSQL с использованием паттерна Одиночка."""
+    
+    _instance = None  # Единственный экземпляр класса (для одиночки)
+
+    def __new__(cls, host, database, user, password):
+        if cls._instance is None:
+            cls._instance = super(DatabaseConnection, cls).__new__(cls)
+            cls._instance._init_connection(host, database, user, password)
+        return cls._instance
+
+    def _init_connection(self, host, database, user, password):
+        """Инициализация подключения к базе данных."""
+        self.conn = psycopg2.connect(
+            host=host,
+            database=database,
+            user=user,
+            password=password
+        )
+        self.conn.autocommit = True
+
+    def execute_query(self, query, params=None, fetchone=False, fetchall=False):
+        """Выполняет SQL-запрос с опциональным извлечением данных."""
+        with self.conn.cursor() as cursor:
+            cursor.execute(query, params)
+            if fetchone:
+                return cursor.fetchone()
+            elif fetchall:
+                return cursor.fetchall()
+
+    def __del__(self):
+        """Закрывает соединение с базой данных при удалении объекта."""
+        if self.conn:
+            self.conn.close()
+
+
+class Client:
+    def __init__(self, client_id, last_name, first_name, middle_name, address, phone):
+        self.client_id = client_id
+        self.last_name = last_name
+        self.first_name = first_name
+        self.middle_name = middle_name
+        self.address = address
+        self.phone = phone
+
+    @classmethod
+    def from_row(cls, row):
+        return cls(
+            client_id=row[0],
+            last_name=row[1],
+            first_name=row[2],
+            middle_name=row[3],
+            address=row[4],
+            phone=row[5]
+        )
+
+
+class ClientRepDb:
+    def __init__(self, db_connection):
+        self.db_connection = db_connection
+
+    def get_by_id(self, client_id):
+        """Получить клиента по ID"""
+        query = "SELECT * FROM clients WHERE client_id = %s"
+        row = self.db_connection.execute_query(query, (client_id,), fetchone=True)
+        return Client.from_row(row) if row else None
+
+    def get_k_n_short_list(self, k, n):
+        """Получить список из n клиентов, начиная с k-го по счету (для пагинации)"""
+        offset = k * n
+        query = "SELECT * FROM clients ORDER BY client_id LIMIT %s OFFSET %s"
+        rows = self.db_connection.execute_query(query, (n, offset), fetchall=True)
+        return [Client.from_row(row) for row in rows]
+
+    def add_client(self, last_name, first_name, middle_name, address, phone):
+        """Добавить нового клиента, создавая уникальный client_id"""
+        query = """
+            INSERT INTO clients (last_name, first_name, middle_name, address, phone) 
+            VALUES (%s, %s, %s, %s, %s) RETURNING client_id
+        """
+        client_id = self.db_connection.execute_query(query, (last_name, first_name, middle_name, address, phone), fetchone=True)
+        return client_id[0]
+
+    def replace_client_by_id(self, client_id, last_name, first_name, middle_name, address, phone):
+        """Заменить клиента по ID новыми данными"""
+        query = """
+            UPDATE clients 
+            SET last_name = %s, first_name = %s, middle_name = %s, address = %s, phone = %s 
+            WHERE client_id = %s
+        """
+        self.db_connection.execute_query(query, (last_name, first_name, middle_name, address, phone, client_id))
+
+    def delete_by_id(self, client_id):
+        """Удалить клиента по ID"""
+        query = "DELETE FROM clients WHERE client_id = %s"
+        self.db_connection.execute_query(query, (client_id,))
+
+    def get_count(self):
+        """Получить количество клиентов"""
+        query = "SELECT COUNT(*) FROM clients"
+        count = self.db_connection.execute_query(query, fetchone=True)
+        return count[0]
