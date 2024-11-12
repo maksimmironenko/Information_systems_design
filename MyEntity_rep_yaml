@@ -1,0 +1,109 @@
+
+import yaml
+import uuid
+
+class Client:
+    def __init__(self, client_id, last_name, first_name, middle_name, address, phone):
+        self.client_id = client_id
+        self.last_name = last_name
+        self.first_name = first_name
+        self.middle_name = middle_name
+        self.address = address
+        self.phone = phone
+
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            client_id=data.get("client_id"),
+            last_name=data.get("last_name"),
+            first_name=data.get("first_name"),
+            middle_name=data.get("middle_name"),
+            address=data.get("address"),
+            phone=data.get("phone")
+        )
+
+    def to_dict(self):
+        return {
+            "client_id": self.client_id,
+            "last_name": self.last_name,
+            "first_name": self.first_name,
+            "middle_name": self.middle_name,
+            "address": self.address,
+            "phone": self.phone
+        }
+
+class ClientRepYaml:
+    def __init__(self, filename):
+        self.filename = filename
+        self.clients = []
+        self.load_data()
+
+    def load_data(self):
+        """Загрузить данные из YAML-файла."""
+        try:
+            with open(self.filename, 'r', encoding='utf-8') as file:
+                data = yaml.safe_load(file) or []
+                self.clients = [Client.from_dict(item) for item in data]
+        except FileNotFoundError:
+            self.clients = []
+
+    def save_data(self):
+        """Сохранить данные в YAML-файл."""
+        with open(self.filename, 'w', encoding='utf-8') as file:
+            yaml.safe_dump([client.to_dict() for client in self.clients], file, allow_unicode=True)
+
+    def get_by_id(self, client_id):
+        """Получить клиента по ID."""
+        for client in self.clients:
+            if client.client_id == client_id:
+                return client
+        return None
+
+    def get_k_n_short_list(self, k, n):
+        """Получить список из n клиентов, начиная с k-го по счету (для пагинации)."""
+        start_index = k * n
+        return self.clients[start_index:start_index + n]
+
+    def sort_by_field(self, field_name):
+        """Сортировать клиентов по указанному полю."""
+        self.clients.sort(key=lambda x: getattr(x, field_name))
+        self.save_data()
+
+    def add_client(self, last_name, first_name, middle_name, address, phone):
+        """Добавить нового клиента, создавая уникальный client_id."""
+        new_client = Client(
+            client_id=str(uuid.uuid4()),
+            last_name=last_name,
+            first_name=first_name,
+            middle_name=middle_name,
+            address=address,
+            phone=phone
+        )
+        self.clients.append(new_client)
+        self.save_data()
+
+    def replace_client_by_id(self, client_id, last_name, first_name, middle_name, address, phone):
+        """Заменить клиента по ID новыми данными."""
+        for i, client in enumerate(self.clients):
+            if client.client_id == client_id:
+                self.clients[i] = Client(client_id, last_name, first_name, middle_name, address, phone)
+                self.save_data()
+                return True
+        return False
+
+    def delete_by_id(self, client_id):
+        """Удалить клиента по ID."""
+        initial_count = len(self.clients)
+        self.clients = [client for client in self.clients if client.client_id != client_id]
+        if len(self.clients) < initial_count:
+            self.save_data()
+            return True
+        return False
+
+    def get_count(self):
+        """Получить количество клиентов."""
+        return len(self.clients)
+
+    def __str__(self):
+        """Вывести полную информацию о всех клиентах."""
+        return "\n".join([str(client.to_dict()) for client in self.clients])
