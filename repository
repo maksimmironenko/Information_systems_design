@@ -94,9 +94,7 @@ class ClientRepository:
         initial_count = len(self.clients)  # Количество клиентов до удаления
         self.clients = [client for client in self.clients if client.client_id != client_id]  # Удаление клиента
         if len(self.clients) < initial_count:  # Проверка, что клиент был удален
-            self.
-
-save_data()  # Сохранение данных
+            self.save_data()  # Сохранение данных
             return True
         return False  # Если клиент не найден
 
