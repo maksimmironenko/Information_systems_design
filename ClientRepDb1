@@ -1,0 +1,95 @@
+import psycopg2  # Работа с PostgreSQL
+from psycopg2 import sql  # Динамическое создание SQL-запросов
+
+# Класс для хранения данных о клиенте
+class Client:
+    def __init__(self, client_id, last_name, first_name, middle_name, address, phone):
+        self.client_id = client_id  # Уникальный ID клиента
+        self.last_name = last_name  # Фамилия клиента
+        self.first_name = first_name  # Имя клиента
+        self.middle_name = middle_name  # Отчество клиента
+        self.address = address  # Адрес клиента
+        self.phone = phone  # Телефон клиента
+
+    @classmethod
+    def from_row(cls, row):
+        # Создание объекта из строки базы данных
+        return cls(
+            client_id=row[0],
+            last_name=row[1],
+            first_name=row[2],
+            middle_name=row[3],
+            address=row[4],
+            phone=row[5]
+        )
+
+# Класс для управления клиентами через базу данных PostgreSQL
+class ClientRepDb:
+    def __init__(self, host, database, user, password):
+        self.conn = psycopg2.connect(
+            host=host,  # Хост базы данных
+            database=database,  # Имя базы данных
+            user=user,  # Имя пользователя
+            password=password  # Пароль пользователя
+        )
+        self.conn.autocommit = True  # Автоматическая фиксация изменений
+
+    def get_by_id(self, client_id):
+        """Получить клиента по ID"""
+        with self.conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT * FROM clients WHERE client_id = %s", (client_id,)
+            )  # Поиск клиента по ID
+            row = cursor.fetchone()  # Получение результата
+            return Client.from_row(row) if row else None  # Преобразование в объект
+
+    def get_k_n_short_list(self, k, n):
+        """Получить список из n клиентов, начиная с k-го по счету (для пагинации)"""
+        offset = k * n  # Вычисление смещения
+        with self.conn.cursor() as cursor:
+            cursor.execute(
+                "SELECT * FROM clients ORDER BY client_id LIMIT %s OFFSET %s", (n, offset)
+            )  # Запрос с пагинацией
+            rows = cursor.fetchall()  # Получение всех строк
+            return [Client.from_row(row) for row in rows]  # Преобразование в объекты
+
+    def add_client(self, last_name, first_name, middle_name, address, phone):
+        """Добавить нового клиента, создавая уникальный client_id"""
+        with self.conn.cursor() as cursor:
+            cursor.execute(
+                "INSERT INTO clients (last_name, first_name, middle_name, address, phone) VALUES (%s, %s, %s, %s, %s) RETURNING client_id",
+                (last_name, first_name, middle_name, address, phone)
+            )  # Вставка нового клиента
+            client_id = cursor.fetchone()[0]  # Получение сгенерированного ID
+            return client_id  # Возврат ID
+
+    def replace_client_by_id(self, client_id, last_name, first_name, middle_name, address, phone):
+        """Заменить клиента по ID новыми данными"""
+        with self.conn.cursor() as cursor:
+            cursor.execute(
+                "UPDATE clients SET last_name = %s, first_name = %s, middle_name = %s, address = %s, phone = %s WHERE client_id = %s",
+                (last_name, first_name, middle_name, address, phone, client_id)
+            )  # Обновление клиента
+            return cursor.rowcount > 0  # Проверка успешности обновления
+
+    def delete_by_id(self, client_id):
+        """Удалить клиента по ID"""
+        with self.conn.cursor() as cursor:
+            cursor.execute(
+                "DELETE FROM clients WHERE client_id = %s", (client_id,)
+            )  # Удаление клиента
+            return cursor.rowcount > 0  # Проверка успешности удаления
+
+    def get_count(self):
+        """Получить количество клиентов"""
+        with self.conn.cursor() as cursor:
+            cursor.execute("SELECT COUNT(*) FROM clients")  # Подсчет записей
+            count = cursor.fetchone()[0]  # Получение результата
+            return count  # Возврат количества
+
+    def __del__(self):
+        """Закрыть соединение с базой данных"""
+        if self.
+
+conn:  # Проверка наличия соединения
+            self.conn.close()  # Закрытие соединения
