@@ -1,17 +1,20 @@
-import json
-import uuid
+Максим Максим, [26.11.2024 11:36]
+import json  # Работа с JSON-файлами
+import uuid  # Генерация уникальных идентификаторов
 
+# Класс для хранения данных о клиенте
 class Client:
     def __init__(self, client_id, last_name, first_name, middle_name, address, phone):
-        self.client_id = client_id
-        self.last_name = last_name
-        self.first_name = first_name
-        self.middle_name = middle_name
-        self.address = address
-        self.phone = phone
+        self.client_id = client_id  # Уникальный ID клиента
+        self.last_name = last_name  # Фамилия клиента
+        self.first_name = first_name  # Имя клиента
+        self.middle_name = middle_name  # Отчество клиента
+        self.address = address  # Адрес клиента
+        self.phone = phone  # Телефон клиента
 
     @classmethod
     def from_dict(cls, data):
+        # Создание объекта из словаря
         return cls(
             client_id=data.get("client_id"),
             last_name=data.get("last_name"),
@@ -22,6 +25,7 @@ class Client:
         )
 
     def to_dict(self):
+        # Преобразование объекта в словарь
         return {
             "client_id": self.client_id,
             "last_name": self.last_name,
@@ -31,78 +35,81 @@ class Client:
             "phone": self.phone
         }
 
+# Класс для управления клиентами через JSON
 class ClientRepJson:
     def __init__(self, filename):
-        self.filename = filename
-        self.clients = []
-        self.load_data()
+        self.filename = filename  # Имя файла для хранения данных
+        self.clients = []  # Список клиентов
+        self.load_data()  # Загрузка данных из файла
 
     def load_data(self):
         """Загрузить данные из JSON-файла."""
         try:
             with open(self.filename, 'r', encoding='utf-8') as file:
-                data = json.load(file)
-                self.clients = [Client.from_dict(item) for item in data]
+                data = json.load(file)  # Чтение данных из файла
+                self.clients = [Client.from_dict(item) for item in data]  # Преобразование в объекты
         except FileNotFoundError:
-            self.clients = []
+            self.clients = []  # Пустой список, если файл отсутствует
 
     def save_data(self):
         """Сохранить данные в JSON-файл."""
         with open(self.filename, 'w', encoding='utf-8') as file:
-            json.dump([client.to_dict() for client in self.clients], file, indent=4)
+            json.dump([client.to_dict() for client in self.clients], file, indent=4)  # Запись в файл
 
     def get_by_id(self, client_id):
         """Получить клиента по ID."""
         for client in self.clients:
-            if client.client_id == client_id:
+            if client.client_id == client_id:  # Поиск клиента по ID
                 return client
-        return None
+        return None  # Если не найден
 
     def get_k_n_short_list(self, k, n):
         """Получить список из n клиентов, начиная с k-го по счету (для пагинации)."""
-        start_index = k * n
-        return self.clients[start_index:start_index + n]
+        start_index = k * n  # Начальный индекс
+        return self.clients[start_index:start_index + n]  # Срез списка клиентов
 
     def sort_by_field(self, field_name):
         """Сортировать клиентов по указанному полю."""
-        self.clients.sort(key=lambda x: getattr(x, field_name))
-        self.save_data()
+        self.clients.sort(key=lambda x: getattr(x, field_name))  # Сортировка по атрибуту
+        self.save_data()  # Сохранение данных после сортировки
 
     def add_client(self, last_name, first_name, middle_name, address, phone):
         """Добавить нового клиента, создавая уникальный client_id."""
         new_client = Client(
-            client_id=str(uuid.uuid4()),
+            client_id=str(uuid.uuid4()),  # Генерация уникального ID
             last_name=last_name,
             first_name=first_name,
             middle_name=middle_name,
             address=address,
             phone=phone
         )
-        self.clients.append(new_client)
-        self.save_data()
+        self.clients.append(new_client)  # Добавление клиента в список
+        self.save_data()  # Сохранение данных
 
     def replace_client_by_id(self, client_id, last_name, first_name, middle_name, address, phone):
         """Заменить клиента по ID новыми данными."""
         for i, client in enumerate(self.clients):
-            if client.client_id == client_id:
-                self.clients[i] = Client(client_id, last_name, first_name, middle_name, address, phone)
-                self.save_data()
+            if client.client_id == client_id:  # Поиск клиента по ID
+                self.clients[i] = Client(client_id, last_name, first_name, middle_name, address, phone)  # Замена клиента
+                self.save_data()  # Сохранение данных
                 return True
-        return False
+        return False  # Если клиент не найден
 
     def delete_by_id(self, client_id):
         """Удалить клиента по ID."""
-        initial_count = len(self.clients)
-        self.clients = [client for client in self.clients if client.client_id != client_id]
-        if len(self.clients) < initial_count:
-            self.save_data()
+
+Максим Максим, [26.11.2024 11:36]
+initial_count = len(self.clients)  # Количество клиентов до удаления
+        self.clients = [client for client in self.clients if client.client_id != client_id]  # Удаление клиента
+        if len(self.clients) < initial_count:  # Проверка, что клиент был удален
+            self.save_data()  # Сохранение данных
             return True
-        return False
+        return False  # Если клиент не найден
 
     def get_count(self):
         """Получить количество клиентов."""
-        return len(self.clients)
+        return len(self.clients)  # Возврат длины списка
 
     def __str__(self):
         """Вывести полную информацию о всех клиентах."""
-        return "\n".join([str(client.to_dict()) for client in self.clients])
+        return "\n".join([str(client.to_dict()) for client in self.clients])  # Форматированный вывод всех клиентов
