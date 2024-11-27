@@ -1,0 +1,73 @@
+"""Класс для работы с клиентами через базу данных."""
+    def __init__(self, db_connection):
+        # Принимаем объект DatabaseConnection для взаимодействия с БД
+        self.db_connection = db_connection
+
+    def get_by_id(self, client_id):
+        # Получаем клиента по ID из базы данных
+        print(f"Getting client by ID {client_id} from the database.")
+
+    def get_k_n_short_list(self, k, n):
+        # Получаем n клиентов из базы данных, начиная с k
+        print(f"Getting {n} clients from database starting at index {k}.")
+
+    def add_client(self, last_name, first_name, middle_name, address, phone):
+        # Добавляем нового клиента в базу данных
+        print("Adding client to the database.")
+
+    def replace_client_by_id(self, client_id, last_name, first_name, middle_name, address, phone):
+        # Заменяем данные клиента в базе данных по ID
+        print(f"Replacing client with ID {client_id} in the database.")
+
+    def delete_by_id(self, client_id):
+        # Удаляем клиента из базы данных по ID
+        print(f"Deleting client with ID {client_id} from the database.")
+
+    def get_count(self):
+        # Получаем количество клиентов в базе данных
+        print("Getting client count from the database.")
+        return 0
+
+
+class ClientRepAdapter(ClientRepository):
+    """Адаптер для интеграции ClientRepDb в систему."""
+    def __init__(self, client_rep_db):
+        # Инициализируем объект ClientRepDb для адаптации
+        self.client_rep_db = client_rep_db
+
+    def get_by_id(self, client_id):
+        # Адаптируем метод get_by_id()
+        return self.client_rep_db.get_by_id(client_id)
+
+    def get_k_n_short_list(self, k, n):
+        # Адаптируем метод get_k_n_short_list()
+        return self.client_rep_db.get_k_n_short_list(k, n)
+
+    def add_client(self, last_name, first_name, middle_name, address, phone):
+        # Адаптируем метод add_client()
+        return self.client_rep_db.add_client(last_name, first_name, middle_name, address, phone)
+
+    def replace_client_by_id(self, client_id, last_name, first_name, middle_name, address, phone):
+        # Адаптируем метод replace_client_by_id()
+        return self.client_rep_db.replace_client_by_id(client_id, last_name, first_name, middle_name, address, phone)
+
+    def delete_by_id(self, client_id):
+        # Адаптируем метод delete_by_id()
+        return self.client_rep_db.delete_by_id(client_id)
+
+    def get_count(self):
+        # Адаптируем метод get_count()
+        return self.client_rep_db.get_count()
+
+
+# Пример использования
+db_connection = DatabaseConnection(connection="connection_obj", cursor="cursor_obj")
+# Создаем объект ClientRepDb
+client_rep_db = ClientRepDb(db_connection)
+# Создаем адаптер для ClientRepDb
+client_adapter = ClientRepAdapter(client_rep_db)
+
+# Примеры вызовов через адаптер
+client_adapter.get_by_id("123")
+client_adapter.add_client("Ivanov", "Ivan", "Ivanovich", "Lenina st.", "+123456789")
+client_adapter.get_count()
