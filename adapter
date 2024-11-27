@@ -1,0 +1,94 @@
+class ClientRepDbAdapter(ClientRepository):
+    """
+    Адаптер, позволяющий использовать ClientRepDb в рамках интерфейса ClientRepository.
+    """
+    # Конструктор класса
+    def __init__(self, db_instance: ClientRepDb):
+        """
+        Инициализация адаптера с использованием экземпляра ClientRepDb.
+        :param db_instance: экземпляр класса ClientRepDb.
+        """
+        self.db_instance = db_instance  # Сохраняем экземпляр ClientRepDb для работы
+    def get_by_id(self, client_id):
+        """
+        Получение клиента по его ID.
+        :param client_id: идентификатор клиента.
+        :return: результат выполнения SQL-запроса.
+        """
+        print(f"Adapter: Getting client by ID {client_id} from DB.")  # Логируем действие
+        # Формируем SQL-запрос и делегируем его выполнение ClientRepDb
+        return self.db_instance.execute_query(f"SELECT * FROM clients WHERE id = {client_id}")
+    
+    def get_k_n_short_list(self, k, n):
+        """
+        Получение списка из n клиентов, начиная с k.
+        :param k: начальная позиция (OFFSET).
+        :param n: количество клиентов (LIMIT).
+        :return: список клиентов.
+        """
+        print(f"Adapter: Getting {n} clients starting from {k} in DB.")  # Логируем действие
+        # Формируем SQL-запрос и делегируем его выполнение ClientRepDb
+        return self.db_instance.execute_query(f"SELECT * FROM clients LIMIT {n} OFFSET {k}")
+    
+    def add_client(self, last_name, first_name, middle_name, address, phone):
+        """
+        Добавление нового клиента в базу данных.
+        :param last_name: фамилия клиента.
+        :param first_name: имя клиента.
+        :param middle_name: отчество клиента.
+        :param address: адрес клиента.
+        :param phone: телефон клиента.
+        """
+        print("Adapter: Adding new client to DB.")  # Логируем действие
+        # Формируем SQL-запрос для добавления нового клиента
+        query = (
+            f"INSERT INTO clients (last_name, first_name, middle_name, address, phone) "
+            f"VALUES ('{last_name}', '{first_name}', '{middle_name}', '{address}', '{phone}')"
+        )
+        # Выполняем SQL-запрос и подтверждаем изменения
+        self.db_instance.execute_query(query)
+        self.db_instance.commit_changes()
+    
+    def replace_client_by_id(self, client_id, last_name, first_name, middle_name, address, phone):
+        """
+        Замена данных клиента по его ID.
+        :param client_id: идентификатор клиента.
+        :param last_name: новая фамилия клиента.
+        :param first_name: новое имя клиента.
+        :param middle_name: новое отчество клиента.
+        :param address: новый адрес клиента.
+        :param phone: новый телефон клиента.
+        """
+        print(f"Adapter: Updating client with ID {client_id} in DB.")  # Логируем действие
+        # Формируем SQL-запрос для обновления данных клиента
+        query = (
+            f"UPDATE clients SET last_name = '{last_name}', first_name = '{first_name}', "
+            f"middle_name = '{middle_name}', address = '{address}', phone = '{phone}' "
+            f"WHERE id = {client_id}"
+        )
+        # Выполняем SQL-запрос и подтверждаем изменения
+        self.db_instance.execute_query(query)
+        self.db_instance.commit_changes()
+    
+    def delete_by_id(self, client_id):
+        """
+        Удаление клиента по его ID.
+        :param client_id: идентификатор клиента.
+        """
+        print(f"Adapter: Deleting client with ID {client_id} from DB.")  # Логируем действие
+        # Формируем SQL-запрос для удаления клиента
+        query = f"DELETE FROM clients WHERE id = {client_id}"
+        # Выполняем SQL-запрос и подтверждаем изменения
+        self.db_instance.execute_query(query)
+        self.db_instance.commit_changes()
+    
+    def get_count(self):
+        """
+        Получение количества клиентов в базе данных.
+        :return: количество клиентов.
+        """
+        print("Adapter: Getting count of clients in DB.")  # Логируем действие
+        # Выполняем SQL-запрос для подсчета количества клиентов
+        result = self.db_instance.
+execute_query("SELECT COUNT(*) FROM clients")
+        return result  # Возвращаем результат
