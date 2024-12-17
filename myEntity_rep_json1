@@ -36,7 +36,6 @@ class Client:
         }
 
 # Класс для управления клиентами через JSON
-#КОМПОЗИЦИЯ
 class ClientRepJson:
     def __init__(self, filename):
         self.filename = filename  # Имя файла для хранения данных
@@ -73,7 +72,7 @@ class ClientRepJson:
         """Сортировать клиентов по указанному полю."""
         self.clients.sort(key=lambda x: getattr(x, field_name))  # Сортировка по атрибуту
         self.save_data()  # Сохранение данных после сортировки
-
+#КОМПОЗИЦИЯ
     def add_client(self, last_name, first_name, middle_name, address, phone):
         """Добавить нового клиента, создавая уникальный client_id."""
         new_client = Client(
@@ -83,6 +82,7 @@ class ClientRepJson:
             middle_name=middle_name,
             address=address,
             phone=phone
+#Экземпляр Client создается и существует только как часть ClientRepository. Уничтожение репозитория приведет к удалению данных о клиентах.
         )
         self.clients.append(new_client)  # Добавление клиента в список
         self.save_data()  # Сохранение данных
