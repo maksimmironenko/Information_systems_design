@@ -1,6 +1,7 @@
 import psycopg2  # Работа с PostgreSQL
 from psycopg2 import sql  # Динамическое создание SQL-запросов
 
+#АССОЦИАЦИЯ
 # Класс для хранения данных о клиенте
 class Client:
     def __init__(self, client_id, last_name, first_name, middle_name, address, phone):
