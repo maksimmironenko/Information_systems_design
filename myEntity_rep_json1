@@ -36,12 +36,13 @@ class Client:
         }
 
 # Класс для управления клиентами через JSON
+#КОМПОЗИЦИЯ
 class ClientRepJson:
     def __init__(self, filename):
         self.filename = filename  # Имя файла для хранения данных
         self.clients = []  # Список клиентов
         self.load_data()  # Загрузка данных из файла
-
+#Объект клиента создается как часть заказа и не существует отдельно.
     def load_data(self):
         """Загрузить данные из JSON-файла."""
         try:
