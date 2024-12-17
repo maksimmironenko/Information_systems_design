@@ -39,9 +39,11 @@ class ClientRepository:
         self.load_data()
 #filename существует независимо от ClientRepository и передается в него извне.
 
+#ДЕЛЕГАЦИЯ
     def load_data(self):
         """Загрузить данные из файла. Реализуется в подклассах."""
         raise NotImplementedError("Subclasses should implement this!")
+#Базовый класс ClientRepository делегирует реализацию метода load_data своим подклассам (ClientRepJson и ClientRepYaml).
 
     def save_data(self):
         """Сохранить данные в файл. Реализуется в подклассах."""
