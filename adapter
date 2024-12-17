@@ -9,6 +9,7 @@ class ClientRepDbAdapter(ClientRepository):
         :param db_instance: экземпляр класса ClientRepDb.
         """
         self.db_instance = db_instance  # Сохраняем экземпляр ClientRepDb для работы
+#ДЕЛЕГАЦИЯ
     def get_by_id(self, client_id):
         """
         Получение клиента по его ID.
@@ -18,6 +19,7 @@ class ClientRepDbAdapter(ClientRepository):
         print(f"Adapter: Getting client by ID {client_id} from DB.")  # Логируем действие
         # Формируем SQL-запрос и делегируем его выполнение ClientRepDb
         return self.db_instance.execute_query(f"SELECT * FROM clients WHERE id = {client_id}")
+#Метод делегирует выполнение SQL-запроса объекту ClientRepDb.
     
     def get_k_n_short_list(self, k, n):
         """
