@@ -31,12 +31,13 @@ class Client:
             "address": self.address,
             "phone": self.phone
         }
-
+# АГРЕГАЦИЯ
 class ClientRepository:
     def __init__(self, filename):
         self.filename = filename
         self.clients = []
         self.load_data()
+#filename существует независимо от ClientRepository и передается в него извне.
 
     def load_data(self):
         """Загрузить данные из файла. Реализуется в подклассах."""
