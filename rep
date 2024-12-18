@@ -105,7 +105,7 @@ class ClientRepository:
     def __str__(self):
         """Вывести полную информацию о всех клиентах."""
         return "\n".join([str(client.to_dict()) for client in self.clients])  # Форматированный вывод всех клиентов
-
+#СТРАТГЕИЯ JSON
 # Репозиторий для работы с JSON
 class ClientRepJson(ClientRepository):
     def load_data(self):
@@ -122,6 +122,7 @@ class ClientRepJson(ClientRepository):
         with open(self.filename, 'w', encoding='utf-8') as file:
             json.dump([client.to_dict() for client in self.clients], file, indent=4)  # Запись в файл
 
+#СТРАТГЕИЯ YAML
 # Репозиторий для работы с YAML
 class ClientRepYaml(ClientRepository):
     def load_data(self):
